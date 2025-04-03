@@ -1,2 +1,4 @@
 # User
 user/config/jwt_keys
+
+user/config/.env
