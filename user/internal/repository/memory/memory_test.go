@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/CP-Payne/taskflow/user/internal/model"
+	"github.com/CP-Payne/taskflow/user/internal/repository"
 	"github.com/CP-Payne/taskflow/user/internal/repository/memory"
 	"github.com/google/uuid"
 )
@@ -41,7 +42,7 @@ func TestMemoryRepository_Create(t *testing.T) {
 					Username: "user2",
 				}
 			},
-			expectErr: memory.ErrDuplicateEmail,
+			expectErr: repository.ErrDuplicateEmail,
 		},
 		{
 			name: "Fail to create user with duplicate username",
@@ -58,7 +59,7 @@ func TestMemoryRepository_Create(t *testing.T) {
 					Username: "duplicateUser", // Same username, different ID
 				}
 			},
-			expectErr: memory.ErrDuplicateUsername,
+			expectErr: repository.ErrDuplicateUsername,
 		},
 	}
 
@@ -129,7 +130,7 @@ func TestMemoryRepository_GetByID(t *testing.T) {
 					Username: "someUsername",
 				}
 			},
-			expectErr: memory.ErrNotFound,
+			expectErr: repository.ErrNotFound,
 		},
 	}
 
@@ -192,7 +193,7 @@ func TestMemoryRepository_GetByEmail(t *testing.T) {
 					Username: "someUsername",
 				}
 			},
-			expectErr: memory.ErrNotFound,
+			expectErr: repository.ErrNotFound,
 		},
 	}
 

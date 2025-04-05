@@ -4,27 +4,23 @@ package user.v1;
 
 option go_package = "github.com/CP-Payne/taskflow/api/user_v1";
 
-
 message AuthenticateUserRequest {
-    string email = 1;
-    string password = 2;
+  string email = 1;
+  string password = 2;
 }
 
-message AuthenticateUserResponse {
-    string jwt = 1;
+message AuthenticateUserResponse { string jwt = 1; }
+
+message RegisterUserRequest {
+  string email = 1;
+  string username = 2;
+  string password = 3;
 }
 
-message RegisterUserRequest{
-    string email = 1;
-    string username = 2;
-    string password = 3;
-}
-
-message RegisterUserResponse{
-    string jwt = 1;
-}
+message RegisterUserResponse { string jwt = 1; }
 
 service User {
-    rpc AuthenticateUser(AuthenticateUserRequest) returns (AuthenticateUserResponse) {} 
-    rpc RegisterUser(RegisterUserRequest) returns (RegisterUserResponse) {}
+  rpc AuthenticateUser(AuthenticateUserRequest)
+      returns (AuthenticateUserResponse) {}
+  rpc RegisterUser(RegisterUserRequest) returns (RegisterUserResponse) {}
 }

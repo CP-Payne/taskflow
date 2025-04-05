@@ -1,4 +1,4 @@
-# User
-user/config/jwt_keys
+user/config/authkeys/id_rsa
+user/config/authkeys/id_rsa.pub
 
 user/config/.env
