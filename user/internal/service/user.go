@@ -35,7 +35,12 @@ func New(repo repository.UserRepository, logger *zap.SugaredLogger) *Service {
 func (s *Service) RegisterUser(ctx context.Context, user *model.User) error {
 	err := s.repo.Create(ctx, user)
 	if err != nil {
-		return err
+		switch {
+		case errors.Is(err, repository.ErrDuplicateEmail) || errors.Is(err, repository.ErrDuplicateUsername):
+			return ErrUserExists
+		default:
+			return ErrInternal
+		}
 	}
 
 	return nil
