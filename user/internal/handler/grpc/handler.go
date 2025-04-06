@@ -14,6 +14,7 @@ import (
 )
 
 type UserHandler struct {
+	api.UnimplementedUserServer
 	userService *service.UserService
 	logger      *zap.SugaredLogger
 }

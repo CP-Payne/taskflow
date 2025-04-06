@@ -15,6 +15,8 @@ require (
 require (
 	github.com/stretchr/testify v1.10.0 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
+	golang.org/x/net v0.34.0 // indirect
 	golang.org/x/sys v0.31.0 // indirect
+	golang.org/x/text v0.23.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250115164207-1a7da9e5054f // indirect
 )
