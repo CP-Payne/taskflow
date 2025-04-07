@@ -14,11 +14,9 @@ type JWTAuthenticator struct {
 	iss  string
 }
 
-func NewJWTAuthenticator(keys authkeys.AuthKeys, aud, iss string) *JWTAuthenticator {
+func NewJWTAuthenticator(keys authkeys.AuthKeys) *JWTAuthenticator {
 	return &JWTAuthenticator{
 		keys: keys,
-		aud:  aud,
-		iss:  iss,
 	}
 }
 

@@ -19,20 +19,21 @@ var (
 	ErrInvalidPassword = errors.New("invalid password hash")
 )
 
-type Service struct {
+type UserService struct {
 	repo          repository.UserRepository
 	logger        *zap.SugaredLogger
 	authenticator auth.Authenticator
 }
 
-func New(repo repository.UserRepository, logger *zap.SugaredLogger) *Service {
-	return &Service{
-		repo:   repo,
-		logger: logger,
+func New(repo repository.UserRepository, authenticator auth.Authenticator, logger *zap.SugaredLogger) *UserService {
+	return &UserService{
+		repo:          repo,
+		authenticator: authenticator,
+		logger:        logger,
 	}
 }
 
-func (s *Service) RegisterUser(ctx context.Context, user *model.User) error {
+func (s *UserService) RegisterUser(ctx context.Context, user *model.User) error {
 	err := s.repo.Create(ctx, user)
 	if err != nil {
 		switch {
@@ -46,7 +47,7 @@ func (s *Service) RegisterUser(ctx context.Context, user *model.User) error {
 	return nil
 }
 
-func (s *Service) AuthenticateUser(ctx context.Context, user *model.User) (string, error) {
+func (s *UserService) AuthenticateUser(ctx context.Context, user *model.User) (string, error) {
 	userDB, err := s.repo.GetByEmail(ctx, user.Email)
 	if err != nil {
 		switch {
