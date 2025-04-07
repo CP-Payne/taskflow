@@ -25,10 +25,11 @@ type UserService struct {
 	authenticator auth.Authenticator
 }
 
-func New(repo repository.UserRepository, logger *zap.SugaredLogger) *UserService {
+func New(repo repository.UserRepository, authenticator auth.Authenticator, logger *zap.SugaredLogger) *UserService {
 	return &UserService{
-		repo:   repo,
-		logger: logger,
+		repo:          repo,
+		authenticator: authenticator,
+		logger:        logger,
 	}
 }
 
