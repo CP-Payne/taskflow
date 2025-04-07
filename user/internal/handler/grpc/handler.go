@@ -28,6 +28,10 @@ func NewUserHandler(userService *service.UserService, logger *zap.SugaredLogger)
 
 func (h *UserHandler) RegisterUser(ctx context.Context, req *api.RegisterUserRequest) (*api.RegisterUserResponse, error) {
 	if req == nil || req.Email == "" || req.Password == "" || req.Username == "" {
+		h.logger.Warnw("RegisterUser validation failed: invalid arguments",
+			"email", req.GetEmail(),
+			"username", req.GetUsername(),
+		)
 		return nil, status.Errorf(codes.InvalidArgument, "nil request or invalid arguments")
 	}
 	user := &model.User{
@@ -40,27 +44,58 @@ func (h *UserHandler) RegisterUser(ctx context.Context, req *api.RegisterUserReq
 	if err != nil {
 		switch {
 		case errors.Is(err, service.ErrUserExists):
-			return nil, status.Errorf(codes.AlreadyExists, "user already exists")
+			h.logger.Warnw("User registration conflict: user already exists",
+				"email", req.Email,
+				"username", req.Username,
+				zap.Error(err),
+			)
+			return nil, status.Errorf(codes.AlreadyExists, "user already exists: %v", err)
 		default:
+			h.logger.Errorw("Internal error during user registration",
+				"email", req.Email,
+				"username", req.Username,
+				"assigned_userID", user.ID,
+				zap.Error(err),
+			)
 			return nil, status.Errorf(codes.Internal, "internal server error")
 		}
 	}
 
 	token, err := h.userService.AuthenticateUser(ctx, user)
 	if err != nil {
+		h.logger.Errorw("Internal error during post-registration authentication",
+			"userID", user.ID.String(),
+			"email", user.Email,
+			zap.Error(err),
+		)
 		switch {
 		case errors.Is(err, service.ErrNotFound) || errors.Is(err, service.ErrInvalidPassword):
-			return nil, status.Errorf(codes.Unauthenticated, "invalid credentials")
+			return nil, status.Errorf(codes.Unauthenticated, "failed to authenticate newly registered user: %v", err)
 		default:
 			return nil, status.Errorf(codes.Internal, "internal server error")
 		}
 	}
 
+	if token == "" {
+		h.logger.Errorw("Post-registration authentication returned empty token without error",
+			"userID", user.ID.String(),
+			"email", user.Email,
+		)
+		return nil, status.Errorf(codes.Internal, "internal server error: empty token received")
+	}
+
+	h.logger.Infow("User registered and authenticated successfully",
+		"userID", user.ID.String(),
+		"email", user.Email,
+	)
 	return &api.RegisterUserResponse{Jwt: token}, nil
 }
 
 func (h *UserHandler) AuthenticateUser(ctx context.Context, req *api.AuthenticateUserRequest) (*api.AuthenticateUserResponse, error) {
 	if req == nil || req.Email == "" || req.Password == "" {
+		h.logger.Warnw("AuthenticateUser validation failed: invalid arguments",
+			"email", req.GetEmail(), // Log email for context
+		)
 		return nil, status.Errorf(codes.InvalidArgument, "nil request or invalid arguments")
 	}
 
@@ -72,13 +107,28 @@ func (h *UserHandler) AuthenticateUser(ctx context.Context, req *api.Authenticat
 	if err != nil {
 		switch {
 		case errors.Is(err, service.ErrNotFound) || errors.Is(err, service.ErrInvalidPassword):
+			h.logger.Warnw("User authentication failed: invalid credentials",
+				"email", req.Email,
+				zap.Error(err), // Include specific reason (NotFound vs InvalidPassword)
+			)
 			return nil, status.Errorf(codes.Unauthenticated, "invalid credentials")
 		default:
+			h.logger.Errorw("Internal error during user authentication",
+				"email", req.Email,
+				zap.Error(err),
+			)
 			return nil, status.Errorf(codes.Internal, "internal server error")
 		}
 	}
 	if token == "" {
-		return nil, status.Errorf(codes.Internal, "internal server error")
+		h.logger.Errorw("Authentication service returned empty token without error",
+			"email", req.Email,
+		)
+		return nil, status.Errorf(codes.Internal, "internal server error: empty token received")
 	}
+
+	h.logger.Infow("User authenticated successfully",
+		"email", req.Email,
+	)
 	return &api.AuthenticateUserResponse{Jwt: token}, nil
 }
