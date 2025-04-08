@@ -22,10 +22,72 @@ message UUID {
 // Task message
 message Task {
   UUID id = 1;
-  string title = 2;
-  string description = 3;
-  Status status = 4;
-  UUID assigned_to = 5; // nullable
-  google.protobuf.Timestamp created_at = 6;
-  google.protobuf.Timestamp updated_at = 7;
+  UUID user_id = 2; // User who created the Task
+  string title = 3;
+  string description = 4;
+  Status status = 5;
+  UUID assigned_to = 6; // nullable
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
+}
+
+message CreateRequest {
+  string title = 1;
+  string description = 2;
+  UUID assigned_to = 3;
+  UUID user_id = 4; // User whom creats the Task
+}
+
+message CreateResponse {
+  Task task = 1;
+}
+message ListRequest {
+
+}
+
+message ListResponse{
+  repeated Task tasks = 1;
+}
+
+message GetByIDRequest {
+  UUID task_id = 1;
+}
+
+message GetByIDResponse {
+  Task task = 1;
+}
+
+message ListUnassignedRequest {
+
+}
+
+message ListUnassignedResponse {
+  repeated Task tasks = 1;
+}
+
+message ListByAssignedUserIDRequest {
+  UUID user_id = 1;
+}
+
+message ListByAssignedUserIDResponse {
+  repeated Task tasks = 1;
+}
+
+
+message ListByUserIDRequest {
+  UUID user_id = 1;
+}
+
+message ListByUserIDResponse {
+  repeated Task tasks = 1;
+}
+
+
+service TaskService {
+  rpc Create(CreateRequest) returns (CreateResponse) {}
+  rpc List(ListRequest) returns (ListResponse) {}
+  rpc GetByID(GetByIDRequest) returns (GetByIDResponse) {}
+  rpc ListUnassigned(ListUnassignedRequest) returns (ListUnassignedResponse) {}
+  rpc ListByAssignedUserID(ListByAssignedUserIDRequest) returns (ListByAssignedUserIDResponse) {}
+  rpc ListByUserID(ListByUserIDRequest) returns (ListByUserIDResponse) {}
 }
