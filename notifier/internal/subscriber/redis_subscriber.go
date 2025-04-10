@@ -3,38 +3,40 @@ package subscriber
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/CP-Payne/taskflow/notifier/internal/notification"
 	"github.com/CP-Payne/taskflow/pkg/events"
 	"github.com/redis/go-redis/v9"
+	"go.uber.org/zap"
 )
 
 type RedisSubscriber struct {
 	rdb    *redis.Client
 	sender notification.Sender
+	logger *zap.SugaredLogger
 }
 
-func NewRedisSubscriber(rdb *redis.Client, sender notification.Sender) *RedisSubscriber {
-	return &RedisSubscriber{rdb: rdb, sender: sender}
+func NewRedisSubscriber(rdb *redis.Client, sender notification.Sender, logger *zap.SugaredLogger) *RedisSubscriber {
+	return &RedisSubscriber{rdb: rdb, sender: sender, logger: logger}
 }
 
 func (s *RedisSubscriber) SubscribeAndProcess(ctx context.Context) {
 	pubsub := s.rdb.Subscribe(ctx, events.ChannelTaskAssigned)
 	_, err := pubsub.Receive(ctx)
 	if err != nil {
-		log.Fatalf("Failed to subscribe to Redis channel %s: %v", events.ChannelTaskAssigned, err)
+		s.logger.Fatalf("Failed to subscribe to Redis channel %s: %v", events.ChannelTaskAssigned, err)
 		return
 	}
 
 	ch := pubsub.Channel()
-	log.Printf("Subscribe to %s. Waiting for messages...\n", events.ChannelTaskAssigned)
+	s.logger.Infof("Subscribe to %s. Waiting for messages...", events.ChannelTaskAssigned)
 
 	for msg := range ch {
-		log.Printf("Received message on %s\n", msg.Channel)
+		s.logger.Infof("Received message on %s", msg.Channel)
+
 		event, err := events.UnmarshalTaskAssignedEvent([]byte(msg.Payload))
 		if err != nil {
-			log.Printf("ERROR: Failed to unmarshal TaskAssignedEvent: %v. Payload: %s", err, msg.Payload)
+			s.logger.Errorw("Failed to unmarshal TaskAssignedEvent", "error", err, "payload", msg.Payload)
 			continue
 		}
 
@@ -42,12 +44,12 @@ func (s *RedisSubscriber) SubscribeAndProcess(ctx context.Context) {
 
 		err = s.sender.Send(ctx, event.UserID, notificationMsg)
 		if err != nil {
-			log.Printf("ERROR: Failed to send notification for TaskID %s to UserID %s: %v", event.TaskID, event.UserID, err)
+			s.logger.Errorw("Failed to send notification", "TaskID", event.TaskID, "RecipientID", event.UserID, "error", err)
 		} else {
-			log.Printf("Successfully processed notification for TaskID %s to UserID %s", event.TaskID, event.UserID)
+			s.logger.Infof("Successfully processed notification for TaskID %s to UserID %s", event.TaskID, event.UserID)
 		}
 	}
-	log.Println("Subscription channel closed.")
+	s.logger.Info("Subscription channel closed.")
 }
 
 func (s *RedisSubscriber) Close() error {
