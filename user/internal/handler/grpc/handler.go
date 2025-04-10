@@ -132,3 +132,42 @@ func (h *UserHandler) AuthenticateUser(ctx context.Context, req *api.Authenticat
 	)
 	return &api.AuthenticateUserResponse{Jwt: token}, nil
 }
+
+func (h *UserHandler) GetByID(ctx context.Context, req *api.GetByIDRequest) (*api.GetByIDResponse, error) {
+	if req == nil || req.GetUserId() == "" {
+		h.logger.Warnw("GetByID validation failed: invalid arguments",
+			"userID", req.GetUserId(),
+		)
+		return nil, status.Errorf(codes.InvalidArgument, "nil request or invalid arguments")
+	}
+
+	// Parse UUID
+	userID, err := uuid.Parse(req.GetUserId())
+	if err != nil {
+		h.logger.Warnw("GetByID invalid userID",
+			"userID", req.GetUserId(),
+			"error", err,
+		)
+		return nil, status.Errorf(codes.InvalidArgument, "invalid userID")
+	}
+
+	user, err := h.userService.GetByID(ctx, userID)
+	if err != nil {
+		if errors.Is(err, service.ErrNotFound) {
+			return nil, status.Errorf(codes.NotFound, "user not found")
+		}
+		h.logger.Errorw("GetByID internal error",
+			"userID", userID.String(),
+			"error", err,
+		)
+		return nil, status.Errorf(codes.Internal, "internal server error")
+
+	}
+
+	h.logger.Infow("User retrieved successfully", "userID", userID)
+	return &api.GetByIDResponse{
+		UserId:   user.ID.String(),
+		Email:    user.Email,
+		Username: user.Username,
+	}, nil
+}
