@@ -2,7 +2,6 @@ package notification
 
 import (
 	"context"
-	"log"
 
 	"go.uber.org/zap"
 )
@@ -22,7 +21,7 @@ func NewLogSender(logger *zap.SugaredLogger) *LogSender {
 }
 
 func (s *LogSender) Send(ctx context.Context, recipient string, message string) error {
-	log.Printf("Sending notification to %s: %s\n", recipient, message)
+	s.logger.Infow("Sending notification", "recipient", recipient, "message", message)
 	// Implement Email call here
 	return nil
 }
