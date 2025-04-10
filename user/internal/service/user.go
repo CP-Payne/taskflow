@@ -9,6 +9,7 @@ import (
 	"github.com/CP-Payne/taskflow/user/internal/model"
 	"github.com/CP-Payne/taskflow/user/internal/repository"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
 
@@ -75,4 +76,16 @@ func (s *UserService) AuthenticateUser(ctx context.Context, user *model.User) (s
 		return "", ErrInternal
 	}
 	return token, nil
+}
+
+func (s *UserService) GetByID(ctx context.Context, userID uuid.UUID) (*model.User, error) {
+	user, err := s.repo.GetByID(ctx, userID)
+	if err != nil {
+		if errors.Is(err, repository.ErrNotFound) {
+			return nil, ErrNotFound
+		}
+		return nil, ErrInternal
+	}
+
+	return user, nil
 }
