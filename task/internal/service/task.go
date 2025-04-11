@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 
+	"github.com/CP-Payne/taskflow/pkg/events"
 	"github.com/CP-Payne/taskflow/task/internal/model"
+	"github.com/CP-Payne/taskflow/task/internal/publisher"
 	"github.com/CP-Payne/taskflow/task/internal/repository"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
@@ -16,14 +18,16 @@ var (
 )
 
 type TaskService struct {
-	repo   repository.TaskRepository
-	logger *zap.SugaredLogger
+	repo      repository.TaskRepository
+	logger    *zap.SugaredLogger
+	publisher publisher.Publisher
 }
 
-func New(repo repository.TaskRepository, logger *zap.SugaredLogger) *TaskService {
+func New(repo repository.TaskRepository, logger *zap.SugaredLogger, publisher publisher.Publisher) *TaskService {
 	return &TaskService{
-		repo:   repo,
-		logger: logger,
+		repo:      repo,
+		logger:    logger,
+		publisher: publisher,
 	}
 }
 
@@ -31,6 +35,16 @@ func (s *TaskService) CreateTask(ctx context.Context, task *model.Task) (*model.
 	task, err := s.repo.Create(ctx, task)
 	if err != nil {
 		return &model.Task{}, ErrInternal
+	}
+
+	if task.AssignedTo != nil {
+		if err := uuid.Validate(task.AssignedTo.String()); err != nil {
+			return &model.Task{}, err
+		}
+		s.publisher.PublishTaskAssigned(ctx, &events.TaskAssignedEvent{
+			TaskID: task.ID.String(),
+			UserID: task.AssignedTo.String(),
+		})
 	}
 	return task, nil
 }

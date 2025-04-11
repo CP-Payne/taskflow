@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package task.v1;
 
-option go_package = "github.com/CP-Payne/taskflow/api/task_v1";
+option go_package = "github.com/CP-Payne/taskflow/pkg/gen/task/v1";
 
 
 import "google/protobuf/timestamp.proto";

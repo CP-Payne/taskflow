@@ -3,8 +3,8 @@ package server
 import (
 	"net"
 
+	grpcApi "github.com/CP-Payne/taskflow/pkg/gen/task/v1"
 	grpchandler "github.com/CP-Payne/taskflow/task/internal/handler/grpc"
-	grpcApi "github.com/CP-Payne/taskflow/task/internal/proto/api/v1"
 
 	"github.com/CP-Payne/taskflow/task/internal/service"
 	"go.uber.org/zap"

@@ -2,3 +2,5 @@ user/config/authkeys/id_rsa
 user/config/authkeys/id_rsa.pub
 
 user/config/.env
+config/.env
+notifier/internal/config/.env

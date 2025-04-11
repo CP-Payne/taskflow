@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package user.v1;
 
-option go_package = "github.com/CP-Payne/taskflow/api/user_v1";
+option go_package = "github.com/CP-Payne/taskflow/pkg/gen/user/v1";
 
 message AuthenticateUserRequest {
   string email = 1;
@@ -19,8 +19,19 @@ message RegisterUserRequest {
 
 message RegisterUserResponse { string jwt = 1; }
 
+message GetByIDRequest {
+  string user_id = 1;
+}
+
+message GetByIDResponse {
+  string user_id = 1;
+  string email = 2;
+  string username = 3;
+}
+
 service User {
   rpc AuthenticateUser(AuthenticateUserRequest)
       returns (AuthenticateUserResponse) {}
   rpc RegisterUser(RegisterUserRequest) returns (RegisterUserResponse) {}
+  rpc GetByID(GetByIDRequest) returns (GetByIDResponse) {}
 }

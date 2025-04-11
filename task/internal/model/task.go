@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	api "github.com/CP-Payne/taskflow/task/internal/proto/api/v1"
+	api "github.com/CP-Payne/taskflow/pkg/gen/task/v1"
 )
 
 type Status int
