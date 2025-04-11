@@ -6,7 +6,9 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/CP-Payne/taskflow/notifier/internal/gateway/user"
 	"github.com/CP-Payne/taskflow/notifier/internal/notification"
+	"github.com/CP-Payne/taskflow/notifier/internal/service"
 	"github.com/CP-Payne/taskflow/notifier/internal/subscriber"
 	"github.com/joho/godotenv"
 	"github.com/redis/go-redis/v9"
@@ -33,6 +35,9 @@ func main() {
 	// TODO: Add to .env and load from config
 	redisAddr := os.Getenv("REDIS_NOTIFIER_ADDR")
 	// redisAddr := "localhost:6379"
+	//
+	gmailSource := os.Getenv("GMAIL_SOURCE")
+	gmailAppPass := os.Getenv("GMAIL_APP_PASSWORD")
 
 	rdb := redis.NewClient(&redis.Options{
 		Addr: redisAddr,
@@ -44,8 +49,10 @@ func main() {
 	defer rdb.Close()
 	logger.Info("Connected to Redis")
 
-	notificationSender := notification.NewLogSender(logger)
-	redisSubscriber := subscriber.NewRedisSubscriber(rdb, notificationSender, logger)
+	userGtw := user.NewGateway(logger)
+	notificationSender := notification.NewEmailSender(gmailSource, gmailAppPass, logger)
+	notificationSrv := service.NewNotificationService(userGtw, notificationSender)
+	redisSubscriber := subscriber.NewRedisSubscriber(rdb, notificationSrv, logger)
 
 	go redisSubscriber.SubscribeAndProcess(ctx)
 

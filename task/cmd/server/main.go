@@ -21,6 +21,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	// Load global config
 	if err := godotenv.Load("./config/.env"); err != nil {
 		logger.Panic("Failed to load global config")
 	}

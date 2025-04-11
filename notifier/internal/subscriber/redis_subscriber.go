@@ -2,22 +2,22 @@ package subscriber
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/CP-Payne/taskflow/notifier/internal/notification"
+	"github.com/CP-Payne/taskflow/notifier/internal/service"
 	"github.com/CP-Payne/taskflow/pkg/events"
+	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 )
 
 type RedisSubscriber struct {
-	rdb    *redis.Client
-	sender notification.Sender
-	logger *zap.SugaredLogger
+	rdb             *redis.Client
+	logger          *zap.SugaredLogger
+	notificationSrv *service.NotificationService
 }
 
-func NewRedisSubscriber(rdb *redis.Client, sender notification.Sender, logger *zap.SugaredLogger) *RedisSubscriber {
-	return &RedisSubscriber{rdb: rdb, sender: sender, logger: logger}
+func NewRedisSubscriber(rdb *redis.Client, srv *service.NotificationService, logger *zap.SugaredLogger) *RedisSubscriber {
+	return &RedisSubscriber{rdb: rdb, notificationSrv: srv, logger: logger}
 }
 
 func (s *RedisSubscriber) SubscribeAndProcess(ctx context.Context) {
@@ -40,9 +40,17 @@ func (s *RedisSubscriber) SubscribeAndProcess(ctx context.Context) {
 			continue
 		}
 
-		notificationMsg := fmt.Sprintf("Task '%s' has been assigned to you.", event.TaskID)
+		userID, err := uuid.Parse(event.UserID)
+		if err != nil {
+			s.logger.Warnw("Failed to parse userID", "userID", event.UserID, "error", err)
+		}
 
-		err = s.sender.Send(ctx, event.UserID, notificationMsg)
+		taskID, err := uuid.Parse(event.TaskID)
+		if err != nil {
+			s.logger.Warnw("Failed to parse taskID", "taskID", event.TaskID, "error", err)
+		}
+
+		err = s.notificationSrv.NotifyUserToCompleteTask(ctx, userID, taskID)
 		if err != nil {
 			s.logger.Errorw("Failed to send notification", "TaskID", event.TaskID, "RecipientID", event.UserID, "error", err)
 		} else {
