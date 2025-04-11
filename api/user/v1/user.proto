@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package user.v1;
 
-option go_package = "github.com/CP-Payne/taskflow/api/user_v1";
+option go_package = "github.com/CP-Payne/taskflow/pkg/gen/user/v1";
 
 message AuthenticateUserRequest {
   string email = 1;

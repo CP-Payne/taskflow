@@ -5,8 +5,8 @@ import (
 	"errors"
 	"time"
 
+	api "github.com/CP-Payne/taskflow/pkg/gen/task/v1"
 	"github.com/CP-Payne/taskflow/task/internal/model"
-	api "github.com/CP-Payne/taskflow/task/internal/proto/api/v1"
 	"github.com/CP-Payne/taskflow/task/internal/service"
 	"github.com/google/uuid"
 	"go.uber.org/zap"

@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
+	api "github.com/CP-Payne/taskflow/pkg/gen/user/v1"
 	"github.com/CP-Payne/taskflow/user/internal/model"
-	api "github.com/CP-Payne/taskflow/user/internal/proto/api/v1"
 	"github.com/CP-Payne/taskflow/user/internal/service"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
