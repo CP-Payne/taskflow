@@ -8,7 +8,8 @@ import (
 )
 
 type Config struct {
-	KeyPath string
+	KeyPath    string
+	JWTSignKey string
 }
 
 func New(envPath string) *Config {

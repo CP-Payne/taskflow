@@ -4,18 +4,34 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/CP-Payne/taskflow/pkg/secrets"
 )
+
+type AuthKeys interface {
+	LoadFromPath(dirPath string) error
+	LoadFromSecretsManager(secretsManager secrets.Secrets, keyPath, keyName string, keyType KeyType) error
+	PrivateKey() []byte
+	PublicKey() []byte
+}
 
 type authKeys struct {
 	private []byte
 	public  []byte
 }
 
+type KeyType int
+
+const (
+	Private KeyType = iota
+	Public
+)
+
 func NewAuthKeys() *authKeys {
 	return &authKeys{}
 }
 
-func (a *authKeys) Load(dirPath string) error {
+func (a *authKeys) LoadFromPath(dirPath string) error {
 	privKeyPath := filepath.Join(dirPath, "id_rsa.pem")
 	pubKeyPath := filepath.Join(dirPath, "id_rsa.pem.pub")
 
@@ -35,6 +51,20 @@ func (a *authKeys) Load(dirPath string) error {
 	a.public = pubKey
 
 	fmt.Println("Successfullyu loaded keys.")
+
+	return nil
+}
+
+func (a *authKeys) LoadFromSecretsManager(secretsManager secrets.Secrets, keyPath, keyName string, keyType KeyType) error {
+	key, err := secretsManager.GetCryptoKey(keyPath, keyName)
+	if err != nil {
+		return err
+	}
+	if keyType == Private {
+		a.private = key
+	} else {
+		a.public = key
+	}
 
 	return nil
 }

@@ -19,6 +19,22 @@ services:
       - redis
     restart: unless-stopped
 
+  vault:
+    image: hashicorp/vault:latest
+    container_name: vault
+    ports:
+      - "8200:8200"
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: "root-token" # ONLY for dev/testing
+      VAULT_ADDR: "http://127.0.0.1:8200"
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - vault-data:/vault/file
+
+volumes:
+  vault-data:
+
 networks:
   backend:
     driver: bridge
