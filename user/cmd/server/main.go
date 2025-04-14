@@ -37,7 +37,7 @@ func main() {
 		logger.Fatalf("failed to fetch auth key: %v", err)
 	}
 
-	logger.Debugf("Fetched Private key from Vault: \n%s\n", authKeys.PrivateKey())
+	// logger.Debugf("Fetched Private key from Vault: \n%s\n", authKeys.PrivateKey())
 	authenticator := auth.NewJWTAuthenticator(authKeys)
 
 	repo := memory.NewInMemory()
