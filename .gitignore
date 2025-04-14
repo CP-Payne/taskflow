@@ -1,6 +1,5 @@
-user/config/authkeys/id_rsa
-user/config/authkeys/id_rsa.pub
-
-user/config/.env
+user/.env
+pkg/authkeys/private.pem
+pkg/authkeys/public.pem
 config/.env
 notifier/internal/config/.env

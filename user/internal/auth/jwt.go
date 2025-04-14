@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/CP-Payne/taskflow/user/config/authkeys"
+	"github.com/CP-Payne/taskflow/pkg/authkeys"
 	"github.com/golang-jwt/jwt/v5"
 )
 
