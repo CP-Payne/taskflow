@@ -17,6 +17,7 @@ func New(envPath string) *Config {
 	if err != nil {
 		fmt.Printf("%v", err)
 		panic("failed to load service config")
+
 	}
 
 	return &Config{

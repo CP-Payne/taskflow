@@ -69,6 +69,6 @@ func (r *Registry) ServiceAddresses(ctx context.Context, serviceName string) ([]
 	return res, nil
 }
 
-func (r *Registry) ReportHealthState(instanceID string, _ string) error {
+func (r *Registry) ReportHealthState(ctx context.Context, instanceID string, _ string) error {
 	return r.client.Agent().PassTTL(instanceID, "")
 }
