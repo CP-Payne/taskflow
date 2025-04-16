@@ -44,6 +44,7 @@ func main() {
 	defer cancel()
 
 	// Register service on Consul
+	// TODO: Add registry addr to global config
 	registry, err := consul.NewRegistry("localhost:8500")
 	if err != nil {
 		logger.Fatalw("failed to create service discovery registry", "error", err)
