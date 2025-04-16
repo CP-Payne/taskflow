@@ -22,7 +22,7 @@ func NewGateway(logger *zap.SugaredLogger) *Gateway {
 }
 
 func (g *Gateway) GetUserDetails(ctx context.Context, userID uuid.UUID) (*model.User, error) {
-	conn, err := grpc.NewClient("localhost:3033", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient("localhost:9001", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		g.logger.Error("Failed to open connection to user service")
 		return nil, err
