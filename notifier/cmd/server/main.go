@@ -84,7 +84,7 @@ func main() {
 		logger.Warnw("Gmail credentials not fully configured")
 	}
 
-	userGtw := user.NewGateway(logger)
+	userGtw := user.NewGateway(registry, logger)
 	notificationSender := notification.NewEmailSender(gmailSource, gmailAppPass, logger)
 	notificationSrv := service.NewNotificationService(userGtw, notificationSender)
 	redisSubscriber := subscriber.NewRedisSubscriber(rdb, notificationSrv, logger)
