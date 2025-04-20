@@ -1,4 +1,5 @@
 user/.env
+gateway/.env
 pkg/authkeys/private.pem
 pkg/authkeys/public.pem
 config/.env

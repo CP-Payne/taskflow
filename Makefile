@@ -18,6 +18,11 @@ GRPC_PLUGIN := protoc-gen-go-grpc
 API_DIR := ./api
 GEN_DIR := ./pkg/gen
 
+# Find googleapis for grpc to http mapping
+#THIRD_PARTY_PROTO_DIR=$(go env GOPATH)/pkg/mod/google.golang.org/genproto@<version>/googleapis
+# THIRD_PARTY_PROTO_DIR=$(shell go list -m -f '{{ .Dir }}' google.golang.org/genproto)/googleapis
+# THIRD_PARTY_PROTO_DIR=$(shell go list -m -f '{{ .Dir }}' github.com/grpc-ecosystem/grpc-gateway)/third_party/googleapis
+
 # Find all .proto files within the api/<service>/v1 structure
 PROTO_FILES := $(shell find $(API_DIR) -path '*/v1/*.proto' -print)
 
@@ -25,6 +30,9 @@ PROTO_FILES := $(shell find $(API_DIR) -path '*/v1/*.proto' -print)
 
 # Default target (optional)
 all: proto
+
+
+
 
 # Generate Go code from proto files
 .PHONY: proto
@@ -39,6 +47,8 @@ proto: check-tools
 		--go_opt=module=$(GOMODULE) \
 		--go-grpc_out=. \
 		--go-grpc_opt=module=$(GOMODULE) \
+		--grpc-gateway_out=. \
+		--grpc-gateway_opt=module=${GOMODULE} \
 		$(PROTO_FILES)
 	@echo "Protobuf Go code generation complete."
 
