@@ -1,14 +1,14 @@
 # Taskflow
 
-# TL;DR
+[![Go Version](https://img.shields.io/badge/Go-1.23.6-blue.svg)](https://golang.org/)
+
+A portfolio project demonstrating a microservices architecture built entirely in Go, leveraging HashiCorp Vault for secrets management and Consul for service discovery.
+
+## TL;DR
 
 A simple event-driven task manager built with Go, using a microservices architecture.
 Features include user authentication with JWT, secure inter-service communication via mutual TLS, Redis-based async notifications, and service discovery with Consul.
 Tech stack: Go, gRPC, Docker, Redis, Vault, Consul.
-
-[![Go Version](https://img.shields.io/badge/Go-1.23.6-blue.svg)](https://golang.org/)
-
-A portfolio project demonstrating a microservices architecture built entirely in Go, leveraging HashiCorp Vault for secrets management and Consul for service discovery.
 
 ## Overview & Motivation
 
@@ -29,19 +29,19 @@ The goal is to simulate a simplified task management system where users can regi
 The system currently consists of three core microservices:
 
 1. **User Service:**
-    - Manages user registration and authentication.
-    - Generates JWTs upon successful login/registration.
-    - Signs JWTs using a private key securely retrieved from HashiCorp Vault's KV store.
-    - Provides user details (like email) to other services.
+   - Manages user registration and authentication.
+   - Generates JWTs upon successful login/registration.
+   - Signs JWTs using a private key securely retrieved from HashiCorp Vault's KV store.
+   - Provides user details (like email) to other services.
 2. **Task Service:**
-    - Manages the creation and retrieval of tasks.
-    - Allows creating tasks assigned to specific users or unassigned tasks.
-    - Lists tasks assigned to a user or retrieves all tasks.
-    - Publishes an event to a Redis channel when a new task is assigned to a user.
+   - Manages the creation and retrieval of tasks.
+   - Allows creating tasks assigned to specific users or unassigned tasks.
+   - Lists tasks assigned to a user or retrieves all tasks.
+   - Publishes an event to a Redis channel when a new task is assigned to a user.
 3. **Notifier Service:**
-    - Subscribes to the task assignment event channel on Redis.
-    - Upon receiving an event, retrieves the relevant user's email from the User service via gRPC (using Consul for discovery).
-    - Sends an email notification to the user about their newly assigned task.
+   - Subscribes to the task assignment event channel on Redis.
+   - Upon receiving an event, retrieves the relevant user's email from the User service via gRPC (using Consul for discovery).
+   - Sends an email notification to the user about their newly assigned task.
 
 **Communication:**
 
@@ -80,74 +80,75 @@ The system currently consists of three core microservices:
 
 1. **Clone the repository:**
 
-    ```bash
-    git clone https://github.com/[Your GitHub Username]/[Your Project Name].git
-    cd [Your Project Name]
-    ```
+   ```bash
+   git clone https://github.com/[Your GitHub Username]/[Your Project Name].git
+   cd [Your Project Name]
+   ```
 
 2. **Configure Environment Variables:**
 
-    - Copy the example environment file:
+   - Copy the example environment file:
 
-      ```bash
-      # Each service has its own env file.
-      # There is a global file in ./config
-      cp .env.example .env
-      ```
+     ```bash
+     # Each service has its own env file.
+     # There is a global file in ./config
+     cp .env.example .env
+     ```
 
-    - The environment files may include values such as:
-      - Vault Address (`VAULT_ADDR`)
-      - Approle Client ID (`APPROLE_ROLE_ID`)
-      - Approle Secret (`APPROLE_SECRET_ID`)
-      - Vault Secret Path for JWT Key (`VAULTKEY_PATH`) - e.g., `data/jwt/auth`
-      - Vault Secret Key Name for JWT Key (`VAULTKEY_NAME`) - e.g., `private_key`
-      - Redis Address (`REDIS_NOTIFIER_ADDR`)
-      - Email to send notification from (`GMAIL_SOURCE`)
-      - Gmail App Password (`GMAIL_APP_PASSWORD`)
+   - The environment files may include values such as:
+     - Vault Address (`VAULT_ADDR`)
+     - Approle Client ID (`APPROLE_ROLE_ID`)
+     - Approle Secret (`APPROLE_SECRET_ID`)
+     - Vault Secret Path for JWT Key (`VAULTKEY_PATH`) - e.g., `data/jwt/auth`
+     - Vault Secret Key Name for JWT Key (`VAULTKEY_NAME`) - e.g., `private_key`
+     - Redis Address (`REDIS_NOTIFIER_ADDR`)
+     - Email to send notification from (`GMAIL_SOURCE`)
+     - Gmail App Password (`GMAIL_APP_PASSWORD`)
 
 3. **Start Infrastructure (Vault, Consul, Redis):**
-    - Use docker-compose to setup HashiCorp Vault and Redis
 
-      ```bash
-      cd scripts
-      docker-compose up -d
-      ```
+   - Use docker-compose to setup HashiCorp Vault and Redis
 
-    - Run Consul
+     ```bash
+     cd scripts
+     docker-compose up -d
+     ```
 
-      ```bash
-      docker run -d -p 8500:8500 -p 8600:8600/udp --name=dev-consul hashicorp/consul agent -server -ui -node=server-1 -bootstrap-expect=1 -client=0.0.0.0
-      ```
+   - Run Consul
+
+     ```bash
+     docker run -d -p 8500:8500 -p 8600:8600/udp --name=dev-consul hashicorp/consul agent -server -ui -node=server-1 -bootstrap-expect=1 -client=0.0.0.0
+     ```
 
 4. **Configure Vault:**
 
-    - Ensure the Vault KV v2 engine is enabled at the path specified in `.env` (usually `secret/` by default in dev mode).
-    - Store your private key in Vault at the path specified (`VAULT_KEY_PATH`) with the key name (`VAULT_KEY_NAME`). _You will need to generate a private/public key pair first (e.g., using `openssl`)._
+   - Ensure the Vault KV v2 engine is enabled at the path specified in `.env` (usually `secret/` by default in dev mode).
+   - Store your private key in Vault at the path specified (`VAULT_KEY_PATH`) with the key name (`VAULT_KEY_NAME`). _You will need to generate a private/public key pair first (e.g., using `openssl`)._
 
-    ```bash
-    # Example using Vault CLI (ensure VAULT_ADDR and VAULT_TOKEN are set)
-    # vault kv put <VAULT_KV_MOUNT>/<VAULT_JWT_KEY_PATH> <VAULT_JWT_KEY_NAME>=@"path/to/your/local/private_key.pem"
-    vault kv put secret/data/jwt/auth private_key=@/path/to/your/private_key.pem
-    ```
+   ```bash
+   # Example using Vault CLI (ensure VAULT_ADDR and VAULT_TOKEN are set)
+   # vault kv put <VAULT_KV_MOUNT>/<VAULT_JWT_KEY_PATH> <VAULT_JWT_KEY_NAME>=@"path/to/your/local/private_key.pem"
+   vault kv put secret/data/jwt/auth private_key=@/path/to/your/private_key.pem
+   ```
 
-    - _Note: Ensure your public key is available separately if needed later for the gateway._
+   - _Note: Ensure your public key is available separately if needed later for the gateway._
 
 5. **Build and Run Services:**
 
-    - Navigate to each service directory and run:
+   - Navigate to each service directory and run:
 
-      ```bash
-      # Example for User Service
-      cd user/cmd/server/
-      go run main.go # optional flag -port
+     ```bash
+     # Example for User Service
+     cd user/cmd/server/
+     go run main.go # optional flag -port
 
-      # Open new terminals for the other services
-      cd task/cmd/server/
-      go run main.go # optional flag -port
+     # Open new terminals for the other services
+     cd task/cmd/server/
+     go run main.go # optional flag -port
 
-      cd notifier/cmd/server/
-      go run main.go # optional flag -port
-      ```
+     cd notifier/cmd/server/
+     go run main.go # optional flag -port
+     ```
 
 ## Usage
 
